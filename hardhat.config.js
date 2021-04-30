@@ -63,12 +63,12 @@ module.exports = {
     //   accounts: [process.env.SECRET],
     //   gasPrice: 5000000000
     // },
-    ethereum: {
-      url: process.env.MAINNET_URL,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 12000000,
-      gasPrice: 80000000000
-    }
+  //  ethereum: {
+  //    url: process.env.MAINNET_URL,
+   //   accounts: [process.env.SECRET],
+   //   blockGasLimit: 12000000,
+    //  gasPrice: 80000000000
+   // }
   },
   gasReporter: {
     currency: 'USD',
