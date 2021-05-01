@@ -103,7 +103,7 @@ interface IUniswapV2Router01 {
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
 
-contract SwapGHST{
+contract Swap{
 
 address quickSwapRouter= 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
 address constant GHST= 0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7;
