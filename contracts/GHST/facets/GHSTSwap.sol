@@ -104,27 +104,37 @@ interface IUniswapV2Router01 {
 }
 
 contract Swap{
+    
 
 address quickSwapRouter= 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
 address constant GHST= 0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7;
 
 
-event GHSTSwapComplete(uint256 _amountIn,uint256 amountOut, address indexed tokenOut);
+event GHSTSwapComplete(uint _amountIn,uint amountOut, address indexed tokenOut);
 
 
-function swapGhstToTokens(uint256 _GhstAmountIn,
-        uint tokenAmountOutMin,
+function swapGhstToTokens(uint _GhstAmountIn,
         address[] calldata path,
-        address _recipient,
-        uint deadline) external {
+        address _recipient) external returns(uint[] memory){
         require(path[0]==GHST,"SwapFacet: Can only swap from GHST");
-        require(IGHSTDiamond(path[0]).allowance(_recipient,address(this))>=tokenAmountOutMin,"SwapFacet: Allowance not enough for swap");
-        console.log((IGHSTDiamond(path[0]).allowance(_recipient,address(this))));
         IUniswapV2Router01 quickSwap= IUniswapV2Router01(quickSwapRouter);
-        uint[] memory amountsOut= quickSwap.swapExactTokensForTokens(_GhstAmountIn,tokenAmountOutMin,path,_recipient,deadline);
-        emit GHSTSwapComplete(_GhstAmountIn,amountsOut[0],path[path.length-1]);
+        IGHSTDiamond ghstToken= IGHSTDiamond(GHST);
+        uint[] memory amounts=quickSwap.getAmountsOut(_GhstAmountIn, path);
+        uint tokenAmountOutMin=amounts[amounts.length-1];
+        require(ghstToken.allowance(_recipient,address(this))>=tokenAmountOutMin,"SwapFacet: Allowance not enough for transfer");
+        ghstToken.approve((quickSwapRouter), _GhstAmountIn);
+        require(ghstToken.transferFrom(msg.sender, address(this), _GhstAmountIn), 'SwapFacet: transferFrom failed.');
+        require(ghstToken.allowance(_recipient,quickSwapRouter)>=tokenAmountOutMin,"UniswapRouter: Allowance not enough for swap");    
+        uint[] memory amountsOut= quickSwap.swapExactTokensForTokens(_GhstAmountIn,tokenAmountOutMin,path,_recipient,block.timestamp);
+        emit GHSTSwapComplete(_GhstAmountIn,amountsOut[amountsOut.length-1],path[path.length-1]);
+        console.log(amountsOut[0]);
+        console.log(amountsOut[1]);
+        console.log(amountsOut[2]);
+        console.log(amountsOut[3]);
+        return amountsOut;
     
 }
+
 
 
 
