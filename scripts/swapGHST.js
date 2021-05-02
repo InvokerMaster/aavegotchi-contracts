@@ -11,14 +11,21 @@ async function main () {
  
 
   let sampleAmountIn= "10000000000000000000"
-  let path= ["0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]
+
+  //best route i could find
+  let path= [
+    "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
+    "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+    "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+    "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"
+  ]
 
   //let deadline= 1622367961
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   const ghstOwner= '0x740b74e09Ab2eF3Ae1785096C9586e9537cA1429'
   const outputToken= path[path.length-1]
                       
-  const erc20Token= '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7'
+  const erc20Token= path[0]
   if (testing) {
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
@@ -49,7 +56,7 @@ async function main () {
   
  
    const swapContract =(await ethers.getContractAt('Swap', swap.address)).connect(ghstHolder)
-  // const currentBal= await erc20.balanceOf(ghstOwner);
+   const currentBal= await erc20.balanceOf(ghstOwner);
   // console.log(currentBal.toString())
     //approve the swap contract
   
@@ -62,8 +69,8 @@ async function main () {
     outputTokenName=await tokenQuery.name()
     outputTokenDec=await tokenQuery.decimals()
     outputTokenAmount= ((((events[events.length-1]).args).amountOut).toString()/10**outputTokenDec)
-    console.log(outputTokenAmount)
-    console.log('successfully swapped ',(sampleAmountIn/10**18),inputTokenName ,'for ', outputTokenName)
+    //console.log(outputTokenAmount)
+    console.log('successfully swapped',(sampleAmountIn/10**18),inputTokenName ,'for', outputTokenAmount,outputTokenName)
     
  //console.log((events[events.length-2]).decode)//.toString())
  // console.log((((events[events.length-1]).args).amountOut).toString())

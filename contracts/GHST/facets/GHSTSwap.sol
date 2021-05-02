@@ -123,14 +123,9 @@ function swapGhstToTokens(uint _GhstAmountIn,
         uint tokenAmountOutMin=amounts[amounts.length-1];
         require(ghstToken.allowance(_recipient,address(this))>=tokenAmountOutMin,"SwapFacet: Allowance not enough for transfer");
         ghstToken.approve((quickSwapRouter), _GhstAmountIn);
-        require(ghstToken.transferFrom(msg.sender, address(this), _GhstAmountIn), 'SwapFacet: transferFrom failed.');
-        require(ghstToken.allowance(_recipient,quickSwapRouter)>=tokenAmountOutMin,"UniswapRouter: Allowance not enough for swap");    
+        require(ghstToken.transferFrom(msg.sender, address(this), _GhstAmountIn), 'SwapFacet: transferFrom failed.');   
         uint[] memory amountsOut= quickSwap.swapExactTokensForTokens(_GhstAmountIn,tokenAmountOutMin,path,_recipient,block.timestamp);
         emit GHSTSwapComplete(_GhstAmountIn,amountsOut[amountsOut.length-1],path[path.length-1]);
-        console.log(amountsOut[0]);
-        console.log(amountsOut[1]);
-        console.log(amountsOut[2]);
-        console.log(amountsOut[3]);
         return amountsOut;
     
 }
