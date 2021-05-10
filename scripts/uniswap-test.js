@@ -61,9 +61,8 @@ let route= new Route([pair],ghst)
 
 
   const trade1=new Trade(route,new TokenAmount(ghst,'10000000000000000000'), TradeType.EXACT_INPUT)
-  const trade2=new Trade(route,new TokenAmount(ghst,'10000000000000000000'), TradeType.EXACT_INPUT)
+ 
   console.log(trade1.executionPrice.toSignificant(6))
-  console.log(trade2.executionPrice.toSignificant(6))
   const deadline = Math.floor(Date.now() / 1000 ) + 60*20//20 mins
   console.log(deadline)
   }
