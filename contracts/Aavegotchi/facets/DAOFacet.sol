@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, GameManagerXPCycle} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
@@ -18,16 +18,12 @@ contract DAOFacet is Modifiers {
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
-    event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
+    event GameManagerSet(address gameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
 
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
-
-    function gameManager() external view returns (address) {
-        return s.gameManager;
-    }
 
     /***********************************|
    |             Write Functions        |
@@ -118,6 +114,16 @@ contract DAOFacet is Modifiers {
             uint256 tokenId = _tokenIds[i];
             uint256 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
+            if (isGameManager(msg.sender)) {
+                uint _key;
+                if (s.gameManagers[msg.sender].cycle == GameManagerXPCycle.Block) {
+                    _key = block.number;
+                } else {
+                    _key = block.timestamp - (block.timestamp % 86400);
+                }
+                require(xp + s.gameManagerStatus[msg.sender][_key] <= s.gameManagers[msg.sender].maxXp, "DAOFacet: Cannot grant because XP exceeds max XP of the game manager this time");
+                s.gameManagerStatus[msg.sender][_key] = s.gameManagerStatus[msg.sender][_key] + xp;
+            }
 
             //To test (Dan): Deal with overflow here? - Handling it just in case
             uint256 experience = s.aavegotchis[tokenId].experience;
@@ -168,8 +174,9 @@ contract DAOFacet is Modifiers {
     }
 
 
-    function setGameManager(address _gameManager) external onlyDaoOrOwner {
-        emit GameManagerTransferred(s.gameManager, _gameManager);
-        s.gameManager = _gameManager;
+    function setGameManager(address _gameManager, uint256 _maxXp, GameManagerXPCycle _cycle) external onlyDaoOrOwner {
+        s.gameManagers[_gameManager].maxXp = _maxXp;
+        s.gameManagers[_gameManager].cycle = _cycle;
+        emit GameManagerSet(_gameManager);
     }
 }

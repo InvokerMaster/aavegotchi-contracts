@@ -621,6 +621,20 @@ describe('Leveling up', async function () {
     expect(aavegotchi.experience).to.equal(1000)
   })
 
+  it('Can grant experience to Aavegotchi', async function () {
+    const isGameManager = await daoFacet.isGameManager(account)
+    if (isGameManager) {
+      await daoFacet.setGameManager(account, 100, 0)
+      await truffleAssert.reverts(daoFacet.grantExperience([testAavegotchiId], ['500']), 'DAOFacet: Cannot grant because XP exceeds max XP of the game manager this time')
+
+      await daoFacet.setGameManager(account, Math.pow(2, 256) - 1, 0)
+      await daoFacet.grantExperience([testAavegotchiId], ['1000'])
+      const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+      expect(aavegotchi.level).to.equal(5)
+      expect(aavegotchi.experience).to.equal(1000)
+    }
+  })
+
   it('Should have 1 skill point at Level 5', async function () {
     const skillPoints = await global.aavegotchiFacet.availableSkillPoints(testAavegotchiId)
     expect(skillPoints).to.equal(1)
@@ -705,7 +719,7 @@ describe('Leveling up', async function () {
   })
 
   it('Experience required to Level 99 should be 6200', async function () {
-    //Current experience is 474000. Level 99 requires 480200. 
+    //Current experience is 474000. Level 99 requires 480200.
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.toNextLevel).to.equal(6200)
   })
@@ -775,10 +789,9 @@ describe('Using Consumables', async function () {
 
 describe('DAO Functions', async function () {
   it('Only DAO or admin can set game manager', async function () {
-    // To do: Check revert using another account
-    await daoFacet.setGameManager(account)
-    const gameManager = await daoFacet.gameManager()
-    expect(gameManager).to.equal(account)
+    await daoFacet.setGameManager(account, Math.pow(2, 256) - 1, 0)
+    const isGameManager = await daoFacet.isGameManager(account)
+    expect(isGameManager).to.equal(true)
   })
 
   it('Cannot add the same collateral twice', async function () {

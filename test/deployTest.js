@@ -812,10 +812,9 @@ describe('Using Consumables', async function () {
 
 describe('DAO Functions', async function () {
   it('Only DAO or admin can set game manager', async function () {
-    // To do: Check revert using another account
-    await daoFacet.setGameManager(account)
-    const gameManager = await daoFacet.gameManager()
-    expect(gameManager).to.equal(account)
+    await daoFacet.setGameManager(account, Math.pow(2, 256) - 1, 0)
+    const isGameManager = await daoFacet.isGameManager(account)
+    expect(isGameManager).to.equal(true)
   })
 
   it('Cannot add the same collateral twice', async function () {

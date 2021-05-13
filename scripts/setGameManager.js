@@ -24,7 +24,7 @@ async function main () {
   console.log('Setting game manager.')
   const daoFacet = await ethers.getContractAt('DAOFacet', diamondAddress, signer)
   if (testing) {
-    const tx = await daoFacet.setGameManager(process.env.NEW_GAME_MANAGER)
+    const tx = await daoFacet.setGameManager(process.env.NEW_GAME_MANAGER, Math.pow(2, 256) - 1, 0)
     console.log('Transaction hash: ' + tx.hash)
     let receipt = await tx.wait()
     if (!receipt.status) {
@@ -33,10 +33,10 @@ async function main () {
     console.log('Transaction complete')
 
     // test by getting the gameManager and seeing it
-    const gameManager = await daoFacet.gameManager()
-    console.log('Game manager:', gameManager)
+    const isActive = await daoFacet.isGameManager(process.env.NEW_GAME_MANAGER)
+    console.log('Is game manager:', isActive)
   } else {
-    let tx = await daoFacet.populateTransaction.setGameManager(process.env.NEW_GAME_MANAGER)
+    let tx = await daoFacet.populateTransaction.setGameManager(process.env.NEW_GAME_MANAGER, Math.pow(2, 256) - 1, 0)
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
